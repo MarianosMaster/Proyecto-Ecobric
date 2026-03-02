@@ -45,11 +45,17 @@ $base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : ''
             </nav>
             <div class="header-actions">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="<?php echo $base_path; ?>paginas/perfil.php" class="btn-icon"><i
+                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 1): ?>
+                        <a href="<?php echo $base_path; ?>paginas/admin_panel.php" class="btn btn-outline"
+                            style="padding: 0.4rem 0.8rem; font-size: 0.9rem; margin-right: 10px;">
+                            <i class="fa-solid fa-gauge-high"></i> Panel ERP
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?php echo $base_path; ?>paginas/perfil.php" class="btn-icon" title="Mi Perfil"><i
                             class="fa-solid fa-user"></i></a>
                     <a href="<?php echo $base_path; ?>paginas/logout_process.php"
-                        onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?');" class="btn-icon"><i
-                            class="fa-solid fa-sign-out-alt"></i></a>
+                        onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?');" class="btn-icon"
+                        title="Cerrar Sesión"><i class="fa-solid fa-sign-out-alt"></i></a>
                 <?php else: ?>
                     <a href="<?php echo $base_path; ?>paginas/login.php" class="btn-icon" title="Iniciar Sesión"><i
                             class="fa-solid fa-user"></i></a>

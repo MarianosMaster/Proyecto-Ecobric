@@ -95,6 +95,14 @@ if ($httpCode === 200 && isset($responseData['candidates'][0]['content']['parts'
 } else {
     // Si falla la API (límite superado, clave errónea...)
     $errorMsg = isset($responseData['error']['message']) ? $responseData['error']['message'] : 'Error desconocido de la API';
-    echo json_encode(['success' => false, 'message' => 'No pude procesar tu mensaje: ' . $errorMsg]);
+
+    // Capturar errores de cuota superada (Límite de API gratuita)
+    if ($httpCode === 429 || stripos($errorMsg, 'Quota exceeded') !== false) {
+        $errorMsg = "¡Uf, qué de trabajo! 🥵 He recibido demasiadas peticiones seguidas y necesito recuperar el aliento. Por favor, espera unos segundos e inténtalo de nuevo.";
+    } else {
+        $errorMsg = 'No pude procesar tu mensaje: ' . $errorMsg;
+    }
+
+    echo json_encode(['success' => false, 'message' => $errorMsg]);
 }
 ?>
