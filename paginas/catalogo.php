@@ -1,5 +1,5 @@
 <?php
-require_once 'config/db.php';
+require_once '../config/db.php';
 
 // Obtener categorías para el filtro
 $stmtCategorias = $pdo->query("SELECT * FROM categorias ORDER BY nombre ASC");
@@ -19,7 +19,7 @@ $stmtProductos = $pdo->prepare("SELECT p.*, c.nombre as categoria_nombre FROM pr
 $stmtProductos->execute($params);
 $productos = $stmtProductos->fetchAll();
 
-include 'includes/header.php';
+include '../includes/header.php';
 ?>
 
 <div class="page-header"
@@ -105,4 +105,4 @@ include 'includes/header.php';
     </div>
 </section>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

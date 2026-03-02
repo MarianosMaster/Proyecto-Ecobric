@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS ecobric_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE OR REPLACE DATABASE ecobric_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ecobric_db;
 
 -- 1. Tabla de roles (Para distinguir entre administradores y clientes)
@@ -77,6 +77,7 @@ CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     monto_total DECIMAL(10,2) NOT NULL,
+    metodo_pago VARCHAR(50) DEFAULT 'Tarjeta',
     estado ENUM('PENDIENTE', 'PAGADO', 'ENVIADO', 'CANCELADO') DEFAULT 'PENDIENTE',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)

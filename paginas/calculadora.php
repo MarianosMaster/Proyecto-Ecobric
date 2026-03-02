@@ -1,11 +1,11 @@
 <?php
-require_once 'config/db.php';
+require_once '../config/db.php';
 
 // Obtener productos calculables
 $stmt = $pdo->query("SELECT * FROM productos WHERE es_calculable_volumen = 1");
 $productosCalculables = $stmt->fetchAll();
 
-include 'includes/header.php';
+include '../includes/header.php';
 ?>
 
 <div class="page-header"
@@ -232,13 +232,48 @@ include 'includes/header.php';
         document.getElementById('res-precio').innerText = precioTotal.toFixed(2).replace('.', ',');
     }
 
-    // Simuladores de Carrito (Para el proyecto real harías Fetch API a un script PHP)
+    // Llamada de verdad al Carrito en lugar de simulación
     function addCalculadoAlCarrito() {
-        alert("Material añadido al carrito exitosamente. (Este botón conectará con PHP vía AJAX)");
+        const selector = document.getElementById('calc-material');
+        const opcion = selector.options[selector.selectedIndex];
+
+        if (!opcion || !opcion.value) {
+            alert("Calcula primero el material antes de añadirlo.");
+            return;
+        }
+
+        const cantidadTotal = parseInt(document.getElementById('res-cantidad').innerText);
+        if (cantidadTotal <= 0 || isNaN(cantidadTotal)) {
+            alert("Fallo al obtener la cantidad. Refresca e inténtalo de nuevo.");
+            return;
+        }
+
+        const productId = opcion.value; // Que es el ID
+
+        fetch('../paginas/add_to_cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${productId}&qty=${cantidadTotal}`
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    let badge = document.querySelector('.cart-count');
+                    if (badge) {
+                        badge.textContent = data.total_items;
+                    } else {
+                        const cartIcon = document.querySelector('.cart-icon');
+                        if (cartIcon) cartIcon.innerHTML += `<span class="cart-count">${data.total_items}</span>`;
+                    }
+                    alert(`¡Éxito! Se añadieron ${cantidadTotal} uds del material a tu carrito.`);
+                }
+            })
+            .catch(err => console.error(err));
     }
+
     function addProyectoCarrito(id) {
-        alert("Kit de proyecto añadido al carrito exitosamente. (Este botón conectará con PHP vía AJAX)");
+        alert("Esta función de 'Kit' está en desarrollo. ¡Gracias por usar Ecobric!");
     }
 </script>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

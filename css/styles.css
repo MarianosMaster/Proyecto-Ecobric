@@ -1,24 +1,28 @@
 /* Variables CSS para consistencia (Diseño Ecológico / Tierra) */
 :root {
-    --primary-color: #2e7d32; /* Verde Hoja */
+    --primary-color: #2e7d32;
+    /* Verde Hoja */
     --primary-light: #60ad5e;
     --primary-dark: #005005;
-    --accent-color: #8d6e63; /* Marrón Tierra */
-    --bg-light: #f9fbe7; /* Beige muy claro para fondo */
-    --text-dark: #3e2723; /* Marrón muy oscuro para texto */
+    --accent-color: #8d6e63;
+    /* Marrón Tierra */
+    --bg-light: #f9fbe7;
+    /* Beige muy claro para fondo */
+    --text-dark: #3e2723;
+    /* Marrón muy oscuro para texto */
     --text-muted: #5d4037;
     --white: #ffffff;
     --danger: #d32f2f;
     --warning: #fbc02d;
     --border-color: #e0e0e0;
-    
+
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
-    
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
-    
+
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+
     --border-radius: 8px;
     --transition: all 0.3s ease;
 }
@@ -40,7 +44,12 @@ body {
     min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--font-heading);
     color: var(--primary-dark);
     margin-bottom: 1rem;
@@ -259,7 +268,7 @@ a:hover {
 
 /* Hero Section (Index) */
 .hero {
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
     color: var(--white);
     text-align: center;
     padding: 8rem 0;
@@ -269,7 +278,7 @@ a:hover {
     color: var(--white);
     font-size: 3.5rem;
     margin-bottom: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero p {
@@ -326,7 +335,8 @@ a:hover {
     height: 200px;
     width: 100%;
     object-fit: cover;
-    background-color: #eee; /* Placeholder bg */
+    background-color: #eee;
+    /* Placeholder bg */
 }
 
 .product-info {
@@ -371,7 +381,8 @@ a:hover {
     margin-bottom: 2rem;
 }
 
-.footer-col h3, .footer-col h4 {
+.footer-col h3,
+.footer-col h4 {
     color: var(--white);
     margin-bottom: 1.5rem;
 }
@@ -388,7 +399,7 @@ a:hover {
 
 .social-links a {
     color: var(--white);
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     width: 40px;
     height: 40px;
     display: flex;
@@ -401,15 +412,18 @@ a:hover {
     background-color: var(--primary-color);
 }
 
-.links-col ul, .contact-info {
+.links-col ul,
+.contact-info {
     list-style: none;
 }
 
-.links-col li, .contact-info li {
+.links-col li,
+.contact-info li {
     margin-bottom: 0.8rem;
 }
 
-.links-col a, .contact-info li {
+.links-col a,
+.contact-info li {
     color: #ccc;
 }
 
@@ -453,6 +467,7 @@ a:hover {
     .hero h1 {
         font-size: 2.5rem;
     }
+
     .footer-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -460,12 +475,79 @@ a:hover {
 
 @media (max-width: 768px) {
     .main-nav {
-        display: none; /* Sería reemplazado por menú móvil en JS */
+        display: none;
+        /* Sería reemplazado por menú móvil en JS */
     }
+
     .mobile-menu-btn {
         display: block;
     }
+
     .footer-grid {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================================================================= */
+/* ===================== RESPONSIVE DESIGN COMPLETIONS ===================== */
+/* ========================================================================= */
+
+@media (max-width: 1024px) {
+    .container {
+        width: 95%;
+    }
+}
+
+@media (max-width: 900px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Header Mobile Adjustments */
+    .header-container {
+        flex-wrap: wrap;
+    }
+
+    .header-actions {
+        margin-left: auto;
+    }
+
+    /* General Adjustments */
+    .section-padding {
+        padding: 3rem 0;
+    }
+
+    h1 {
+        font-size: 2rem !important;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    /* Product Grid Mobile */
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Pages specific layouts */
+    .cart-grid,
+    div[style*="grid-template-columns: 1fr 2fr"],
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+        /* Stack elements vertically on mobile */
+    }
+}
+
+/* ========================================================================= */
+/* =========================== CHATBOT STYLES ============================== */
+/* ========================================================================= */
+/* Los estilos del chatbot se han movido a includes/footer.php para evitar problemas de caché */

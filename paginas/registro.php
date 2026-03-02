@@ -1,5 +1,6 @@
 <?php
-require_once 'config/db.php';
+require_once '../config/db.php';
+require_once '../includes/mailer.php';
 $mensaje = '';
 $tipo_mensaje = '';
 
@@ -22,15 +23,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // Hash Password
             $hash = password_hash($pass, PASSWORD_DEFAULT);
-            $token = bin2hex(random_bytes(32)); // Token de simulación para correo
+            $codigo_verificacion = mt_rand(100000, 999999); // Código de 6 dígitos
 
             $stmt = $pdo->prepare("INSERT INTO usuarios (rol_id, nombre, email, contrasena, token_verificacion, esta_verificado) VALUES (?, ?, ?, ?, ?, ?)");
-            // Rol_id 2 = Cliente. esta_verificado = 0 por defecto si enviamos correo. 
-            // Para poder probarlo rápido ahora lo pego en 1 (Verificado):
-            if ($stmt->execute([2, $nombre, $email, $hash, $token, 1])) {
-                $mensaje = "Registro exitoso. (Nota: Verificación automática para pruebas). <a href='login.php'>Haz click aquí para iniciar sesión.</a>";
-                $tipo_mensaje = "exito";
-                // --- Aquí iría la llamada a PHPMailer enviando el enlace con ?token=$token ---
+            // Rol_id 2 = Cliente. esta_verificado = 0 para requerir verificación por código
+            if ($stmt->execute([2, $nombre, $email, $hash, $codigo_verificacion, 0])) {
+
+                // Enviar correo de verificación
+                $cuerpo = "
+                <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333;'>
+                    <div style='max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #2e7d32;'>
+                        <h2 style='color: #2e7d32; text-align: center;'>¡Bienvenido a Ecobric, $nombre!</h2>
+                        <p style='font-size: 16px;'>Gracias por unirte a la Revolución Verde.</p>
+                        <p style='font-size: 16px;'>Para activar tu cuenta, por favor introduce el siguiente código de verificación en la web:</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <span style='font-size: 32px; font-weight: bold; background-color: #e8f5e9; color: #2e7d32; padding: 10px 20px; border-radius: 5px; letter-spacing: 5px;'>$codigo_verificacion</span>
+                        </div>
+                        <p style='font-size: 14px; color: #777;'>Si no has solicitado este registro, puedes ignorar este mensaje.</p>
+                        <hr style='border: none; border-top: 1px solid #eee; margin: 20px 0;'>
+                        <p style='font-size: 12px; text-align: center; color: #999;'>&copy; 2026 Ecobric. Todos los derechos reservados.</p>
+                    </div>
+                </div>";
+
+                enviarCorreo($email, "Verifica tu cuenta en Ecobric", $cuerpo);
+
+                session_start();
+                $_SESSION['email_verificacion'] = $email;
+                header("Location: verificar.php");
+                exit;
             } else {
                 $mensaje = "Ocurrió un error en el registro.";
                 $tipo_mensaje = "error";
@@ -39,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-include 'includes/header.php';
+include '../includes/header.php';
 ?>
 
 <div
@@ -101,4 +121,4 @@ include 'includes/header.php';
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

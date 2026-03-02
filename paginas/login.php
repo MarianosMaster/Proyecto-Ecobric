@@ -1,5 +1,5 @@
 <?php
-require_once 'config/db.php';
+require_once '../config/db.php';
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['nombre'];
             $_SESSION['user_role'] = $user['rol_id'];
-            header("Location: index.php");
+            header("Location: ../index.php");
             exit;
         } else {
             $error = "Debes verificar tu correo electrónico antes de iniciar sesión.";
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-include 'includes/header.php';
+include '../includes/header.php';
 ?>
 
 <div
@@ -73,4 +73,4 @@ include 'includes/header.php';
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

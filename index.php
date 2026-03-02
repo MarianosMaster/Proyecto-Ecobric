@@ -16,8 +16,9 @@ include 'includes/header.php';
         <p>Materiales ecológicos, bloques de tierra y aislantes naturales para un futuro más verde. Reduce el impacto
             ambiental de tus obras con Ecobric.</p>
         <div class="hero-actions">
-            <a href="catalogo.php" class="btn btn-primary">Ver Catálogo</a>
-            <a href="calculadora.php" class="btn btn-outline" style="color:white; border-color:white;">Calculadora de
+            <a href="paginas/catalogo.php" class="btn btn-primary">Ver Catálogo</a>
+            <a href="paginas/calculadora.php" class="btn btn-outline"
+                style="color:white; border-color:white;">Calculadora de
                 Materiales</a>
         </div>
     </div>
@@ -37,6 +38,15 @@ include 'includes/header.php';
                     style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
                 <h3 style="font-size: 1.2rem;">100% Ecológico</h3>
                 <p>Materiales con baja huella de carbono y procesos de fabricación sostenibles.</p>
+            </div>
+            <div class="feature-box"
+                style="text-align: center; padding: 2rem; background-color: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); transition: var(--transition);">
+                <i class="fa-solid fa-layer-group"
+                    style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+                <h3>Simulador de Muro</h3>
+                <p style="margin-bottom: 1rem;">Visuliza de forma interactiva las capas de tu pared y obtén el
+                    Certificado de Huella Verde.</p>
+                <a href="paginas/simulador.php" class="btn btn-outline">Probar Ahora</a>
             </div>
             <div
                 style="padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-sm);">
@@ -92,10 +102,9 @@ include 'includes/header.php';
                             <?php echo number_format($producto['precio'], 2, ',', '.'); ?> €
                         </div>
                         <div style="display:flex; gap:0.5rem; mt-auto">
-                            <a href="producto.php?id=<?php echo $producto['id']; ?>" class="btn btn-outline"
+                            <a href="paginas/producto.php?id=<?php echo $producto['id']; ?>" class="btn btn-outline"
                                 style="flex:1; padding: 0.5rem;">Ver Detalle</a>
-                            <button class="btn btn-primary" style="padding: 0.5rem;" title="Añadir al carrito"><i
-                                    class="fa-solid fa-cart-plus"></i></button>
+
                         </div>
                     </div>
                 </div>
@@ -103,8 +112,8 @@ include 'includes/header.php';
         </div>
 
         <div style="text-align: center; margin-top: 3rem;">
-            <a href="catalogo.php" class="btn btn-accent">Ver Catálogo Completo <i class="fa-solid fa-arrow-right"
-                    style="margin-left: 5px;"></i></a>
+            <a href="paginas/catalogo.php" class="btn btn-accent">Ver Catálogo Completo <i
+                    class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i></a>
         </div>
     </div>
 </section>

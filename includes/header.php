@@ -5,6 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // Calcular número de items en carrito (simulación por ahora)
 $cart_count = isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0;
+
+$base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -19,33 +21,40 @@ $cart_count = isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'
         rel="stylesheet">
     <!-- Iconos de FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="<?php echo $base_path; ?>css/styles.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
     <header class="main-header">
         <div class="container header-container">
-            <a href="index.php" class="logo">
-                <!-- Placeholder de logo. ¡Cámbialo cuando tengas el tuyo! -->
-                <i class="fa-solid fa-leaf"></i> Ecobric
+            <a href="<?php echo $base_path; ?>index.php" class="logo"
+                style="display: flex; align-items: center; gap: 10px;">
+                <img src="<?php echo $base_path; ?>img/logo.png" alt="Ecobric Logo"
+                    style="height: 40px; width: auto; object-fit: contain;">
+                <span>Ecobric</span>
             </a>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="index.php">Inicio</a></li>
-                    <li><a href="catalogo.php">Catálogo</a></li>
-                    <li><a href="calculadora.php">Calculadora <span class="badge">Nuevo</span></a></li>
-                    <li><a href="nosotros.php">Nosotros</a></li>
-                    <li><a href="contacto.php">Contacto</a></li>
+                    <li><a href="<?php echo $base_path; ?>index.php">Inicio</a></li>
+                    <li><a href="<?php echo $base_path; ?>paginas/catalogo.php">Catálogo</a></li>
+                    <li><a href="<?php echo $base_path; ?>paginas/calculadora.php">Calculadora <span
+                                class="badge">Nuevo</span></a></li>
+                    <li><a href="<?php echo $base_path; ?>paginas/nosotros.php">Nosotros</a></li>
+                    <li><a href="<?php echo $base_path; ?>paginas/contacto.php">Contacto</a></li>
                 </ul>
             </nav>
             <div class="header-actions">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="perfil.php" class="btn-icon"><i class="fa-solid fa-user"></i></a>
-                    <a href="logout.php" class="btn-icon"><i class="fa-solid fa-sign-out-alt"></i></a>
+                    <a href="<?php echo $base_path; ?>paginas/perfil.php" class="btn-icon"><i
+                            class="fa-solid fa-user"></i></a>
+                    <a href="<?php echo $base_path; ?>paginas/logout_process.php"
+                        onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?');" class="btn-icon"><i
+                            class="fa-solid fa-sign-out-alt"></i></a>
                 <?php else: ?>
-                    <a href="login.php" class="btn-icon" title="Iniciar Sesión"><i class="fa-solid fa-user"></i></a>
+                    <a href="<?php echo $base_path; ?>paginas/login.php" class="btn-icon" title="Iniciar Sesión"><i
+                            class="fa-solid fa-user"></i></a>
                 <?php endif; ?>
-                <a href="carrito.php" class="btn-icon cart-icon">
+                <a href="<?php echo $base_path; ?>paginas/carrito.php" class="btn-icon cart-icon">
                     <i class="fa-solid fa-shopping-cart"></i>
                     <?php if ($cart_count > 0): ?>
                         <span class="cart-count">

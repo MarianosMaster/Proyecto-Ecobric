@@ -1,5 +1,5 @@
 <?php
-// Simulación para PHPMailer (En un entorno real aquí harías el 'require' de PHPMailer autoloader)
+require_once '../includes/mailer.php';
 $mensaje_estado = '';
 $mensaje_clase = '';
 
@@ -9,30 +9,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $asunto = htmlspecialchars($_POST['asunto'] ?? '');
     $mensaje = htmlspecialchars($_POST['mensaje'] ?? '');
 
-    // Aquí iría la lógica real de PHPMailer:
-    /*
-    require 'vendor/autoload.php';
-    $mail = new PHPMailer(true);
-    try {
-        // Configuración servidor (Ejemplo Mailtrap o SMTP Gmail)
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.ejemplo.com';
-        $mail->SMTPAuth   = true;
-        ...
-        $mail->send();
-    */
-
-    // Simulación de éxito
     if (!empty($nombre) && !empty($email) && !empty($mensaje)) {
-        $mensaje_estado = "Gracias por tu mensaje, $nombre. Hemos recibido tu consulta y te responderemos a $email lo antes posible.";
-        $mensaje_clase = "alert-success";
+
+        $cuerpo = "<h3>Nuevo Mensaje de Contacto</h3>
+                   <p><strong>Nombre:</strong> $nombre</p>
+                   <p><strong>Email:</strong> $email</p>
+                   <p><strong>Asunto:</strong> $asunto</p>
+                   <p><strong>Mensaje:</strong><br>$mensaje</p>";
+
+        // Enviar al soporte
+        $enviadoSoporte = enviarCorreo('ecobricsoporte@gmail.com', "Contacto: $asunto", $cuerpo);
+
+        // Opcional: Enviar auto-respuesta al cliente
+        $cuerpoCliente = "<h3>Hola $nombre,</h3><p>Hemos recibido tu consulta sobre <strong>$asunto</strong>. Nuestro equipo te responderá lo antes posible.</p><p>Gracias por contactar con Ecobric.</p>";
+        enviarCorreo($email, "Hemos recibido tu consulta - Ecobric", $cuerpoCliente);
+
+        if ($enviadoSoporte) {
+            $mensaje_estado = "Gracias por tu mensaje, $nombre. Hemos recibido tu consulta y te responderemos a $email lo antes posible.";
+            $mensaje_clase = "alert-success";
+        } else {
+            $mensaje_estado = "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
+            $mensaje_clase = "alert-danger";
+        }
     } else {
         $mensaje_estado = "Por favor, completa todos los campos requeridos.";
         $mensaje_clase = "alert-danger";
     }
 }
 
-include 'includes/header.php';
+include '../includes/header.php';
 ?>
 
 <div class="page-header"
@@ -146,4 +151,4 @@ include 'includes/header.php';
     </div>
 </section>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
