@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 // Reemplaza esto con tu verdadera API Key de Google Gemini
-$apiKey = 'AIzaSyCGaK7A89ta9FGlvMrwn2oaNOtuMw7xtdQ';
+$apiKey = '[GCP_API_KEY]';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Método no permitido']);

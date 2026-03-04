@@ -46,7 +46,7 @@ $base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : ''
             <div class="header-actions">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 1): ?>
-                        <a href="<?php echo $base_path; ?>paginas/admin_panel.php" class="btn btn-outline"
+                        <a href="<?php echo $base_path; ?>paginas/admin_dashboard.php" class="btn btn-outline"
                             style="padding: 0.4rem 0.8rem; font-size: 0.9rem; margin-right: 10px;">
                             <i class="fa-solid fa-gauge-high"></i> Panel ERP
                         </a>
@@ -60,7 +60,8 @@ $base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : ''
                     <a href="<?php echo $base_path; ?>paginas/login.php" class="btn-icon" title="Iniciar Sesión"><i
                             class="fa-solid fa-user"></i></a>
                 <?php endif; ?>
-                <a href="<?php echo $base_path; ?>paginas/carrito.php" class="btn-icon cart-icon">
+                <a href="<?php echo $base_path; ?>paginas/carrito.php" class="btn-icon cart-icon"
+                    style="margin-right: 15px;">
                     <i class="fa-solid fa-shopping-cart"></i>
                     <?php if ($cart_count > 0): ?>
                         <span class="cart-count">
@@ -68,9 +69,34 @@ $base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : ''
                         </span>
                     <?php endif; ?>
                 </a>
+
+                <!-- Botón menú móvil (dentro de header-actions) -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú"><i
+                        class="fa-solid fa-bars"></i></button>
             </div>
-            <!-- Botón menú móvil -->
-            <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
         </div>
     </header>
     <main class="main-content">
+
+        <!-- Lógica del Menú Móvil Global -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('mobileMenuBtn');
+                const nav = document.querySelector('.main-nav');
+
+                if (btn && nav) {
+                    btn.addEventListener('click', () => {
+                        nav.classList.toggle('active');
+                        // Cambiar icono entre Hamburguesa y Equis
+                        const icon = btn.querySelector('i');
+                        if (nav.classList.contains('active')) {
+                            icon.classList.remove('fa-bars');
+                            icon.classList.add('fa-times');
+                        } else {
+                            icon.classList.remove('fa-times');
+                            icon.classList.add('fa-bars');
+                        }
+                    });
+                }
+            });
+        </script>
