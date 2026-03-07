@@ -74,9 +74,9 @@ include '../includes/header.php';
                     <p style="color: var(--danger); font-weight: bold; margin-bottom: 2rem;">
                         <i class="fa-solid fa-box-open"></i> Sin Stock
                     </p>
-                <?php elseif ($producto['stock'] < 100): ?>
+                <?php elseif ($producto['stock'] < 5): ?>
                     <p style="color: #d97706; font-weight: bold; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-box"></i> Low stock: <?php echo $producto['stock']; ?> unidades restantes!
+                        <i class="fa-solid fa-box"></i> ¡Poco stock: solo quedan <?php echo $producto['stock']; ?> unidades!
                     </p>
                 <?php else: ?>
                     <p style="color: var(--primary-color); font-weight: bold; margin-bottom: 2rem;">

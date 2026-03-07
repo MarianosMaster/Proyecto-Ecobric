@@ -26,15 +26,15 @@ include '../includes/header.php';
                     de la necesidad de reducir la inmensa huella de carbono que genera el sector de la construcción
                     tradicional.</p>
                 <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">Nuestro catálogo se especializa en materiales de
-                    bioconstrucción: desde bloques de tierra comprimida (BTC) que no requieren cocción, hasta aislantes
-                    térmicos basados en corcho y cáñamo.</p>
+                    bioconstrucción: desde herramientas básicas, hasta nuestras pinturas naturales más contributivas al
+                    medioambiente.</p>
 
                 <h3 style="color: var(--accent-color); margin-top: 2rem; margin-bottom: 1rem;">Nuestra Misión</h3>
                 <p style="margin-bottom: 1.5rem;">Proveer a arquitectos, constructores y aficionados al bricolaje de
                     alternativas viables, económicas y 100% respetuosas con el planeta.</p>
 
                 <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Nuestra Visión</h3>
-                <p>Convertirnos en el principal proveedor de materiales ecológicos a nivel nacional, demostrando que
+                <p>Convertirnos en el principal proveedor de materiales ecológicos a nivel regional, demostrando que
                     construir de forma sostenible no solo es ético, sino también rentable y duradero.</p>
             </div>
         </div>
@@ -61,7 +61,7 @@ include '../includes/header.php';
                     style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
                 <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Comunidad</h3>
                 <p style="color: var(--text-muted);">Apoyamos proyectos de autoconstrucción comunitaria y brindamos
-                    asesoría técnica gratuita.</p>
+                    asesoría técnica.</p>
             </div>
             <div
                 style="padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-sm);">

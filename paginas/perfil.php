@@ -23,7 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_password'])) {
     $user = $stmt->fetch();
 
     if ($user && password_verify($current_pass, $user['contrasena'])) {
-        if ($new_pass === $confirm_pass && strlen($new_pass) >= 6) {
+        if ($new_pass !== $confirm_pass) {
+            $error = "La nueva contraseña no coincide.";
+        } elseif (strlen($new_pass) < 8 || !preg_match('/[A-Z]/', $new_pass) || !preg_match('/[a-z]/', $new_pass) || !preg_match('/[0-9]/', $new_pass) || !preg_match('/[^a-zA-Z0-9]/', $new_pass)) {
+            $error = "La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.";
+        } else {
             $hash = password_hash($new_pass, PASSWORD_DEFAULT);
             $update = $pdo->prepare("UPDATE usuarios SET contrasena = ? WHERE id = ?");
             if ($update->execute([$hash, $user_id])) {
@@ -31,11 +35,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_password'])) {
             } else {
                 $error = "Error al actualizar la base de datos.";
             }
-        } else {
-            $error = "La nueva contraseña no coincide o es demasiado corta.";
         }
     } else {
         $error = "La contraseña actual es incorrecta.";
+    }
+}
+
+// Procesar Actualización de Dirección
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_address'])) {
+    $nueva_direccion = trim($_POST['direccion_predeterminada']);
+    $stmtAddrUpdate = $pdo->prepare("UPDATE usuarios SET direccion_predeterminada = ? WHERE id = ?");
+    if ($stmtAddrUpdate->execute([$nueva_direccion, $user_id])) {
+        $success = "Dirección predeterminada actualizada.";
+    } else {
+        $error = "Error al actualizar la dirección.";
     }
 }
 
@@ -82,6 +95,24 @@ include '../includes/header.php';
                 </div>
 
                 <div
+                    style="background: white; padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                    <h3
+                        style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        Dirección Predeterminada de Envío</h3>
+
+                    <form method="POST" action="perfil.php" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="hidden" name="update_address" value="1">
+                        <div>
+                            <textarea name="direccion_predeterminada" rows="3"
+                                placeholder="Ej: Calle Mayor 12, Código Postal, Ciudad"
+                                style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; outline: none; font-family: inherit; resize: vertical;"><?php echo htmlspecialchars($userData['direccion_predeterminada'] ?? ''); ?></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline" style="align-self: flex-start;">Guardar
+                            Dirección</button>
+                    </form>
+                </div>
+
+                <div
                     style="background: white; padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm);">
                     <h3
                         style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
@@ -109,12 +140,14 @@ include '../includes/header.php';
                         </div>
                         <div>
                             <label style="font-weight: 500;">Nueva Contraseña</label>
-                            <input type="password" name="new_password" required minlength="6"
+                            <input type="password" name="new_password" required minlength="8"
+                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}"
+                                title="Debe contener al menos 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial."
                                 style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; outline: none;">
                         </div>
                         <div>
                             <label style="font-weight: 500;">Confirmar Nueva</label>
-                            <input type="password" name="confirm_password" required minlength="6"
+                            <input type="password" name="confirm_password" required minlength="8"
                                 style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; outline: none;">
                         </div>
                         <button type="submit" class="btn btn-outline"
@@ -143,6 +176,7 @@ include '../includes/header.php';
                                         <th style="padding: 1rem; text-align: right;">Total</th>
                                         <th style="padding: 1rem; text-align: center;">Método</th>
                                         <th style="padding: 1rem; text-align: center;">Estado</th>
+                                        <th style="padding: 1rem; text-align: center;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,6 +200,13 @@ include '../includes/header.php';
                                                     <?php echo htmlspecialchars($ped['estado']); ?>
                                                 </span>
                                             </td>
+                                            <td style="padding: 1rem; text-align: center;">
+                                                <button class="btn btn-outline"
+                                                    style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"
+                                                    onclick="verDetalles(<?php echo $ped['id']; ?>)">
+                                                    <i class="fa-solid fa-eye"></i> Detalles
+                                                </button>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -184,5 +225,70 @@ include '../includes/header.php';
         </div>
     </div>
 </section>
+
+<!-- Modal Detalles Pedido -->
+<div id="modalDetalles"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div
+        style="background: white; padding: 2rem; border-radius: var(--border-radius); width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+            <h2 style="margin: 0;">Detalles del Pedido <span id="modalPedidoId"></span></h2>
+            <button onclick="cerrarModalDetalles()"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        <div id="modalContenido">
+            <p style="text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i>
+                Cargando detalles...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function verDetalles(pedidoId) {
+        document.getElementById('modalDetalles').style.display = 'flex';
+        document.getElementById('modalPedidoId').innerText = "#" + String(pedidoId).padStart(5, '0');
+        document.getElementById('modalContenido').innerHTML = '<p style="text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando detalles...</p>';
+
+        fetch('../api/get_order_details.php?id=' + pedidoId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let html = '<div style="background-color: #f0f4f8; padding: 10px; border-radius: 4px; margin-bottom: 15px;">' +
+                        '<h4 style="margin: 0 0 5px 0; color: #2e7d32; font-size: 0.9rem;">Enviado a:</h4>' +
+                        '<p style="margin: 0; font-size: 0.95rem;">' + data.direccion_envio + '</p></div>' +
+                        '<table style="width: 100%; border-collapse: collapse;">' +
+                        '<thead style="background: var(--bg-light); border-bottom: 1px solid var(--border-color);">' +
+                        '<tr><th style="padding: 0.5rem; text-align: left;">Producto</th>' +
+                        '<th style="padding: 0.5rem; text-align: center;">Cant.</th>' +
+                        '<th style="padding: 0.5rem; text-align: right;">Precio</th>' +
+                        '<th style="padding: 0.5rem; text-align: right;">Subtotal</th></tr></thead><tbody>';
+                    let total = 0;
+                    data.detalles.forEach(item => {
+                        let subtotal = item.cantidad * item.precio_unitario;
+                        total += subtotal;
+                        html += '<tr style="border-bottom: 1px solid #eee;">' +
+                            '<td style="padding: 0.5rem;">' + item.nombre + '</td>' +
+                            '<td style="padding: 0.5rem; text-align: center;">' + item.cantidad + '</td>' +
+                            '<td style="padding: 0.5rem; text-align: right;">' + parseFloat(item.precio_unitario).toFixed(2) + ' €</td>' +
+                            '<td style="padding: 0.5rem; text-align: right; font-weight: bold;">' + subtotal.toFixed(2) + ' €</td>' +
+                            '</tr>';
+                    });
+                    html += '</tbody></table>';
+
+                    document.getElementById('modalContenido').innerHTML = html;
+                } else {
+                    document.getElementById('modalContenido').innerHTML = '<p style="color: var(--danger); text-align: center;">' + data.message + '</p>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('modalContenido').innerHTML = '<p style="color: var(--danger); text-align: center;">Error de conexión.</p>';
+            });
+    }
+
+    function cerrarModalDetalles() {
+        document.getElementById('modalDetalles').style.display = 'none';
+    }
+</script>
 
 <?php include '../includes/footer.php'; ?>

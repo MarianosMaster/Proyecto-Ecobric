@@ -64,7 +64,8 @@ include '../includes/header.php';
                             style="color: var(--primary-color); font-size: 1.5rem; margin-top: 5px;"></i>
                         <div>
                             <h4 style="margin-bottom: 0.2rem;">Dirección</h4>
-                            <p style="color: var(--text-muted);">Polígono Verde Industrial, Nave 4<br>28001 Madrid,
+                            <p style="color: var(--text-muted);">Tres Olivos - La Piedad,<br>Toledo, 45600, Talavera de
+                                la Reina,<br>
                                 España</p>
                         </div>
                     </li>
@@ -82,7 +83,7 @@ include '../includes/header.php';
                             style="color: var(--primary-color); font-size: 1.5rem; margin-top: 5px;"></i>
                         <div>
                             <h4 style="margin-bottom: 0.2rem;">Correo Electrónico</h4>
-                            <p style="color: var(--text-muted);">info@ecobric.es</p>
+                            <p style="color: var(--text-muted);">ecobricsoporte@gmail.com</p>
                         </div>
                     </li>
                 </ul>

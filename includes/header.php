@@ -37,13 +37,28 @@ $base_path = strpos($_SERVER['SCRIPT_NAME'], '/paginas/') !== false ? '../' : ''
                 <ul>
                     <li><a href="<?php echo $base_path; ?>index.php">Inicio</a></li>
                     <li><a href="<?php echo $base_path; ?>paginas/catalogo.php">Catálogo</a></li>
-                    <li><a href="<?php echo $base_path; ?>paginas/calculadora.php">Calculadora <span
-                                class="badge">Nuevo</span></a></li>
+                    <li><a href="<?php echo $base_path; ?>paginas/calculadora.php">Calculadora
                     <li><a href="<?php echo $base_path; ?>paginas/nosotros.php">Nosotros</a></li>
                     <li><a href="<?php echo $base_path; ?>paginas/contacto.php">Contacto</a></li>
                 </ul>
             </nav>
             <div class="header-actions">
+                <!-- Google Translate Widget -->
+                <div id="google_translate_element"
+                    style="display:inline-block; margin-right:15px; vertical-align: middle;"></div>
+                <script type="text/javascript">
+                    function googleTranslateElementInit() {
+                        new google.translate.TranslateElement({
+                            pageLanguage: 'es',
+                            includedLanguages: 'es,en',
+                            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                            autoDisplay: false
+                        }, 'google_translate_element');
+                    }
+                </script>
+                <script type="text/javascript"
+                    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 1): ?>
                         <a href="<?php echo $base_path; ?>paginas/admin_dashboard.php" class="btn btn-outline"

@@ -213,7 +213,7 @@ $page_title = "Pedidos a Proveedores";
                                                     value="<?php echo $p['precio_suministro']; ?>">
                                             </td>
                                             <td>
-                                                <?php if ($p['stock'] < 20): ?>
+                                                <?php if ($p['stock'] < 5): ?>
                                                     <span style="color:var(--danger); font-weight:bold;"><i
                                                             class="fa-solid fa-warning"></i>
                                                         <?php echo $p['stock']; ?>

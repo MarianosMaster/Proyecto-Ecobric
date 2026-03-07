@@ -13,6 +13,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($pass !== $pass_confirm) {
         $mensaje = "Las contraseñas no coinciden.";
         $tipo_mensaje = "error";
+    } elseif (strlen($pass) < 8 || !preg_match('/[A-Z]/', $pass) || !preg_match('/[a-z]/', $pass) || !preg_match('/[0-9]/', $pass) || !preg_match('/[^a-zA-Z0-9]/', $pass)) {
+        $mensaje = "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.";
+        $tipo_mensaje = "error";
     } else {
         // Verificar existencia de email
         $stmt_check = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
@@ -98,14 +101,16 @@ include '../includes/header.php';
                 <div>
                     <label for="password"
                         style="font-weight: 500; display: block; margin-bottom: 0.5rem;">Contraseña</label>
-                    <input type="password" id="password" name="password" required minlength="6"
+                    <input type="password" id="password" name="password" required minlength="8"
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}"
+                        title="Debe contener al menos 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial."
                         style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; outline: none;">
                 </div>
 
                 <div>
                     <label for="password_confirm" style="font-weight: 500; display: block; margin-bottom: 0.5rem;">Confirmar
                         Contraseña</label>
-                    <input type="password" id="password_confirm" name="password_confirm" required minlength="6"
+                    <input type="password" id="password_confirm" name="password_confirm" required minlength="8"
                         style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; outline: none;">
                 </div>
 

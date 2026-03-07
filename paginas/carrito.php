@@ -8,6 +8,17 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
+// Obtener dirección por defecto para rellenar el formulario o usar en checkout
+$direccion_defecto_form = '';
+if (isset($_SESSION['user_id'])) {
+    $stmtAddr = $pdo->prepare("SELECT direccion_predeterminada FROM usuarios WHERE id = ?");
+    $stmtAddr->execute([$_SESSION['user_id']]);
+    $rowAddr = $stmtAddr->fetch();
+    if ($rowAddr) {
+        $direccion_defecto_form = $rowAddr['direccion_predeterminada'];
+    }
+}
+
 // Lógica de borrar producto del carrito
 if (isset($_GET['remove'])) {
     $id_remove = (int) $_GET['remove'];
@@ -30,76 +41,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     } else {
         $metodo = $_POST['metodo_pago'] ?? 'Tarjeta';
         $total = $_POST['total_pagar'] ?? 0;
+        $direccion_envio = trim($_POST['direccion_envio'] ?? '');
+        $guardar_direccion = isset($_POST['guardar_direccion']) ? true : false;
 
-        $pdo->beginTransaction();
-        try {
-            // VERIFICAR STOCK PRIMERO
-            $stockValido = true;
-            $erroresStock = [];
-            foreach ($_SESSION['cart'] as $item) {
-                $stmtCheck = $pdo->prepare("SELECT stock, nombre FROM productos WHERE id = ? FOR UPDATE");
-                $stmtCheck->execute([$item['id']]);
-                $prodDb = $stmtCheck->fetch();
-                if (!$prodDb || $prodDb['stock'] < $item['quantity']) {
-                    $stockValido = false;
-                    $disponible = $prodDb ? $prodDb['stock'] : 0;
-                    $erroresStock[] = "El producto '{$item['name']}' solo tiene $disponible unidades en stock.";
-                }
-            }
-
-            if (!$stockValido) {
-                $pdo->rollBack();
-                $mensaje = implode("<br>", $erroresStock);
-            } else {
-                // 1. Insertar Pedido
-                $stmt = $pdo->prepare("INSERT INTO pedidos (usuario_id, monto_total, metodo_pago, estado) VALUES (?, ?, ?, 'PAGADO')");
-                $stmt->execute([$_SESSION['user_id'], $total, $metodo]);
-                $pedido_id = $pdo->lastInsertId();
-
-                // 2. Insertar Productos y descontar Stock
-                $stmtProd = $pdo->prepare("INSERT INTO detalles_pedido (pedido_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)");
-                $stmtStock = $pdo->prepare("UPDATE productos SET stock = stock - ? WHERE id = ?");
-
-                $itemsHtml = "";
+        if (empty($direccion_envio)) {
+            $mensaje = "Por favor, introduce una dirección de envío válida.";
+            $stockValido = false; // Forzar fallo para no procesar
+        } else {
+            $pdo->beginTransaction();
+            try {
+                // VERIFICAR STOCK PRIMERO
+                $stockValido = true;
+                $erroresStock = [];
                 foreach ($_SESSION['cart'] as $item) {
-                    $stmtProd->execute([$pedido_id, $item['id'], $item['quantity'], $item['price']]);
-                    $stmtStock->execute([$item['quantity'], $item['id']]);
-                    $subt = number_format($item['price'] * $item['quantity'], 2, ',', '.');
-                    $precioUnit = number_format($item['price'], 2, ',', '.');
-                    $itemsHtml .= "<li><strong>{$item['name']}</strong> - {$item['quantity']} uds. x {$precioUnit} &euro; = {$subt} &euro;</li>";
+                    $stmtCheck = $pdo->prepare("SELECT stock, nombre FROM productos WHERE id = ? FOR UPDATE");
+                    $stmtCheck->execute([$item['id']]);
+                    $prodDb = $stmtCheck->fetch();
+                    if (!$prodDb || $prodDb['stock'] < $item['quantity']) {
+                        $stockValido = false;
+                        $disponible = $prodDb ? $prodDb['stock'] : 0;
+                        $erroresStock[] = "El producto '{$item['name']}' solo tiene $disponible unidades en stock.";
+                    }
                 }
 
-                $pdo->commit();
+                if (!$stockValido) {
+                    $pdo->rollBack();
+                    $mensaje = implode("<br>", $erroresStock);
+                } else {
+                    // Guardar como predeterminada si marcó la casilla
+                    if ($guardar_direccion) {
+                        $stmtAddrUpdate = $pdo->prepare("UPDATE usuarios SET direccion_predeterminada = ? WHERE id = ?");
+                        $stmtAddrUpdate->execute([$direccion_envio, $_SESSION['user_id']]);
+                    }
 
-                // Configurar Email con PHPMailer
-                require_once '../includes/PHPMailer-6.8.1/src/Exception.php';
-                require_once '../includes/PHPMailer-6.8.1/src/PHPMailer.php';
-                require_once '../includes/PHPMailer-6.8.1/src/SMTP.php';
+                    // 1. Insertar Pedido
+                    $stmt = $pdo->prepare("INSERT INTO pedidos (usuario_id, monto_total, metodo_pago, direccion_envio, estado) VALUES (?, ?, ?, ?, 'PAGADO')");
+                    $stmt->execute([$_SESSION['user_id'], $total, $metodo, $direccion_envio]);
+                    $pedido_id = $pdo->lastInsertId();
 
-                $stmtUser = $pdo->prepare("SELECT nombre, email FROM usuarios WHERE id = ?");
-                $stmtUser->execute([$_SESSION['user_id']]);
-                $user = $stmtUser->fetch();
+                    // 2. Insertar Productos y descontar Stock
+                    $stmtProd = $pdo->prepare("INSERT INTO detalles_pedido (pedido_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)");
+                    $stmtStock = $pdo->prepare("UPDATE productos SET stock = stock - ? WHERE id = ?");
 
-                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-                $emailEnviado = false;
-                $emailError = '';
-                try {
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.mailtrap.io'; // o tú servidor SMTP
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'dummy_user';
-                    $mail->Password = 'dummy_pass';
-                    $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port = 2525;
-                    $mail->CharSet = 'UTF-8';
+                    $itemsHtml = "";
+                    foreach ($_SESSION['cart'] as $item) {
+                        $stmtProd->execute([$pedido_id, $item['id'], $item['quantity'], $item['price']]);
+                        $stmtStock->execute([$item['quantity'], $item['id']]);
+                        $subt = number_format($item['price'] * $item['quantity'], 2, ',', '.');
+                        $precioUnit = number_format($item['price'], 2, ',', '.');
+                        $itemsHtml .= "<li><strong>{$item['name']}</strong> - {$item['quantity']} uds. x {$precioUnit} &euro; = {$subt} &euro;</li>";
+                    }
 
-                    $mail->setFrom('pedidos@ecobric.es', 'Ecobric Shop');
-                    $mail->addAddress($user['email'], $user['nombre']);
+                    $pdo->commit();
 
-                    $mail->isHTML(true);
-                    $mail->Subject = "Confirmación de Pedido #" . str_pad($pedido_id, 5, '0', STR_PAD_LEFT) . " - Ecobric";
+                    // Configurar Email con Función Global MAILER
+                    require_once '../includes/mailer.php';
 
-                    $mail->Body = "
+                    $stmtUser = $pdo->prepare("SELECT nombre, email FROM usuarios WHERE id = ?");
+                    $stmtUser->execute([$_SESSION['user_id']]);
+                    $user = $stmtUser->fetch();
+
+                    $asunto = "Confirmación de Pedido #" . str_pad($pedido_id, 5, '0', STR_PAD_LEFT) . " - Ecobric";
+
+                    $html_correo = "
                         <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;'>
                             <div style='background-color: #2e7d32; color: white; padding: 20px; text-align: center;'>
                                 <h2 style='margin: 0;'>¡Gracias por tu compra, {$user['nombre']}!</h2>
@@ -110,6 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                                 <ul style='line-height: 1.6;'>
                                     {$itemsHtml}
                                 </ul>
+                                <div style='background-color: #f0f4f8; padding: 15px; border-radius: 4px; margin-top: 15px;'>
+                                    <h4 style='margin: 0 0 10px 0; color: #2e7d32;'>Enviar a:</h4>
+                                    <p style='margin: 0;'><b>" . htmlspecialchars($direccion_envio) . "</b></p>
+                                </div>
                                 <div style='background-color: #f9f9f9; padding: 15px; border-radius: 4px; text-align: right; margin-top: 20px;'>
                                     <h3 style='margin: 0; color: #333;'>Total Pagado: " . number_format($total, 2, ',', '.') . " &euro;</h3>
                                 </div>
@@ -119,26 +127,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                             </div>
                             <div style='background-color: #eee; padding: 15px; text-align: center; font-size: 12px; color: #777;'>
                                 &copy; " . date('Y') . " Ecobric. Proyecto ASIR. Todos los derechos reservados.<br>
-                                <a href='mailto:info@ecobric.es' style='color: #2e7d32; text-decoration: none;'>info@ecobric.es</a>
+                                <a href='mailto:ecobricsoporte@gmail.com' style='color: #2e7d32; text-decoration: none;'>ecobricsoporte@gmail.com</a>
                             </div>
                         </div>
                     ";
 
-                    // Como estamos en entorno de desarrollo, lo comentamos para evitar timeout. Se activa en prod.
-                    // $mail->send();
-                    $emailEnviado = true;
-                } catch (Exception $e) {
-                    $emailError = $mail->ErrorInfo;
-                }
+                    // Enviar correo real usando la configuración global
+                    $emailEnviado = enviarCorreo($user['email'], $asunto, $html_correo);
 
-                // Limpiar carrito
-                $_SESSION['cart'] = [];
-                $mensajeEmail = $emailEnviado ? " Hemos enviado los detalles a tu email." : " (Email de confirmación generado, envío en simulación para dev).";
-                $mensaje = "¡Pedido #" . str_pad($pedido_id, 5, '0', STR_PAD_LEFT) . " realizado con éxito! " . $mensajeEmail;
+                    // Limpiar carrito
+                    $_SESSION['cart'] = [];
+                    $mensajeEmail = $emailEnviado ? " Hemos enviado los detalles a tu email." : " (Error al enviar el email de confirmación).";
+                    $mensaje = "¡Pedido #" . str_pad($pedido_id, 5, '0', STR_PAD_LEFT) . " realizado con éxito! " . $mensajeEmail;
+                }
+            } catch (\Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $mensaje = "Error al procesar el pedido. Detalle técnico: " . htmlspecialchars($e->getMessage());
             }
-        } catch (\Exception $e) {
-            $pdo->rollBack();
-            $mensaje = "Error al procesar el pedido. Detalle técnico: " . htmlspecialchars($e->getMessage());
         }
     }
 }
@@ -260,7 +267,22 @@ $total = $subtotal + $envio;
                             <input type="hidden" name="checkout" value="1">
                             <input type="hidden" name="total_pagar" value="<?php echo $total; ?>">
 
-                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Método de Pago:</label>
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;"><i
+                                    class="fa-solid fa-map-location-dot"></i> Dirección de Envío:</label>
+                            <input type="text" name="direccion_envio" required
+                                placeholder="Ej: Calle Gran Vía 12, 5º Dcha, Madrid"
+                                value="<?php echo htmlspecialchars($direccion_defecto_form ?? ''); ?>"
+                                style="width: 100%; padding: 0.8rem; margin-bottom: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px;">
+
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                                <input type="checkbox" id="guardar_direccion" name="guardar_direccion" value="1" <?php echo !empty($direccion_defecto_form) ? 'checked' : ''; ?>>
+                                <label for="guardar_direccion"
+                                    style="font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">Guardar como
+                                    predeterminada</label>
+                            </div>
+
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;"><i
+                                    class="fa-solid fa-credit-card"></i> Método de Pago:</label>
                             <select name="metodo_pago"
                                 style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
                                 <option value="Tarjeta de Crédito">Tarjeta de Crédito / Débito</option>

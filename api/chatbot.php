@@ -2,8 +2,9 @@
 // api/chatbot.php
 header('Content-Type: application/json');
 
-// Reemplaza esto con tu verdadera API Key de Google Gemini
-$apiKey = '[GCP_API_KEY]';
+// Cargar las claves seguras
+require_once '../config/api_keys.php';
+$apiKey = GEMINI_API_KEY;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Método no permitido']);

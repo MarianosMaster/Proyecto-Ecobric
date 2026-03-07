@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-03-2026 a las 20:48:09
+-- Tiempo de generación: 05-03-2026 a las 16:22:12
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -65,7 +65,13 @@ INSERT INTO `detalles_pedido` (`pedido_id`, `producto_id`, `cantidad`, `precio_u
 (2, 15, 4, 33.15),
 (2, 16, 1, 50.75),
 (3, 20, 2, 100.52),
-(4, 17, 5, 148.13);
+(4, 17, 5, 148.13),
+(5, 18, 1, 60.79),
+(6, 18, 1, 60.79),
+(7, 17, 1, 148.13),
+(8, 16, 2, 50.75),
+(8, 17, 1, 148.13),
+(8, 18, 1, 60.79);
 
 -- --------------------------------------------------------
 
@@ -87,7 +93,8 @@ CREATE TABLE `movimientos_inventario` (
 --
 
 INSERT INTO `movimientos_inventario` (`id`, `producto_id`, `tipo_movimiento`, `cantidad`, `fecha_movimiento`, `notas`) VALUES
-(1, 8, 'ENTRADA', 10, '2026-03-04 18:30:36', 'Compra a Pveedor - Costo: 1664.7€');
+(1, 8, 'ENTRADA', 10, '2026-03-04 18:30:36', 'Compra a Pveedor - Costo: 1664.7€'),
+(2, 17, 'ENTRADA', 25, '2026-03-05 15:07:56', 'Compra a Pveedor - Costo: 2962.5€');
 
 -- --------------------------------------------------------
 
@@ -100,6 +107,7 @@ CREATE TABLE `pedidos` (
   `usuario_id` int(11) NOT NULL,
   `monto_total` decimal(10,2) NOT NULL,
   `metodo_pago` varchar(50) DEFAULT 'Tarjeta',
+  `direccion_envio` varchar(255) NOT NULL,
   `estado` enum('PENDIENTE','PAGADO','ENVIADO','CANCELADO') DEFAULT 'PENDIENTE',
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -108,11 +116,15 @@ CREATE TABLE `pedidos` (
 -- Volcado de datos para la tabla `pedidos`
 --
 
-INSERT INTO `pedidos` (`id`, `usuario_id`, `monto_total`, `metodo_pago`, `estado`, `creado_en`) VALUES
-(1, 2, 75.75, 'Tarjeta de Crédito', 'PAGADO', '2026-03-04 18:07:46'),
-(2, 2, 208.35, 'Tarjeta de Crédito', 'PAGADO', '2026-03-04 18:30:00'),
-(3, 2, 226.04, 'Tarjeta de Crédito', 'PAGADO', '2026-03-04 18:30:08'),
-(4, 2, 765.65, 'Tarjeta de Crédito', 'PAGADO', '2026-03-04 18:50:45');
+INSERT INTO `pedidos` (`id`, `usuario_id`, `monto_total`, `metodo_pago`, `direccion_envio`, `estado`, `creado_en`) VALUES
+(1, 2, 75.75, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 18:07:46'),
+(2, 2, 208.35, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 18:30:00'),
+(3, 2, 226.04, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 18:30:08'),
+(4, 2, 765.65, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 18:50:45'),
+(5, 2, 85.79, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 20:11:08'),
+(6, 2, 85.79, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 20:13:10'),
+(7, 2, 173.13, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 20:15:48'),
+(8, 3, 335.42, 'Tarjeta de Crédito', 'Desconocida', 'PAGADO', '2026-03-04 21:27:31');
 
 -- --------------------------------------------------------
 
@@ -141,22 +153,22 @@ INSERT INTO `productos` (`id`, `categoria_id`, `nombre`, `descripcion`, `precio`
 (1, 1, 'Taladro atornillador 12V REVDD12C-QW', 'Taladro atornillador compacto con batería 12V de alta eficiencia\r\n\r\nCarcasa fabricada con Tritan Renew 50% de material reciclado certificado \r\nFabricado a partir de 8 botellas de plástico de un solo uso (Contiene una cantidad de plástico reciclado equivalente al peso de 8 botellas de plástico de 0,5L (10,3g) de un solo uso)', 57.61, 20, 0, NULL, 'https://www.blackanddecker.es/EMEA/PRODUCT/IMAGES/HIRES/Ecomm_Large-REVDD12C_1.jpg?resize=530x530', '2026-03-04 17:56:50'),
 (2, 1, 'Taladro percutor 12V REVHD12C-QW', 'Taladro percutor de alto rendimiento con un par máximo de 40 Nm para perforación en mampostería y hormigón.\r\n\r\nDiseño ergonómico, compacto y ligero que permite trabajar en espacios reducidos y reduce la fatiga durante el uso diario.\r\n\r\nGatillo de velocidad variable para un máximo control. Para cubrir la mayoría de las aplicaciones diarias de bricolaje en el hogar y al aire libre', 49.05, 20, 0, NULL, 'https://www.blackanddecker.es/EMEA/PRODUCT/IMAGES/HIRES/Ecomm_Large-REVHD12C_4.jpg?resize=530x530', '2026-03-04 17:56:50'),
 (3, 1, 'Sierra de calar 12V REVJ12C-QW', 'Esta sierra de calar sin cable 12V tiene la potencia y la versatilidad que necesita para cortar perfiles, curvas y esquinas con facilidad y precisión. Diseño compacto y ergonómico, ideal para realizar tareas de corte precisas.\r\n\r\nCarcasa fabricada con Tritan Renew 50% de material reciclado certificado \r\nFabricado a partir de 8 botellas de plástico de un solo uso (Contiene una cantidad de plástico reciclado equivalente al peso de 8 botellas de plástico de 0,5L (10,3g) de un solo uso)', 30.25, 15, 0, NULL, 'https://www.blackanddecker.es/EMEA/PRODUCT/IMAGES/HIRES/Ecomm_Large-REVJ12C_1.jpg?resize=530x530', '2026-03-04 17:56:50'),
-(4, 2, 'Radio de emergencia solar RescueWave', 'Prepárate para cualquier situación con RescueWave, la radio de emergencia versátil y sostenible diseñada para mantenerte conectado, iluminado y con energía en momentos clave. Fabricada con plástico ABS reciclado certificado RCS (Recycled Claim Standard), este dispositivo combina innovación, seguridad y compromiso ambiental.', 26.74, 50, 0, NULL, 'https://firstgreen.es/cdn/shop/files/RadiodeEmergenciaconLinternayPowerBankdeCargaSolaryManivelaSostenibledeABSRecicladoconCertificadoRCSPersonalizableRescueWave_1.jpg?v=1758013678', '2026-03-04 17:56:50'),
-(5, 3, 'Graphenstone Ecosphere Premium Blanco 15L', 'Pintura de interior de base cal, Graphenstone Ecosphere, en color blanco con acabado mate. \r\n\r\nPintura mineral natural muy lavable, gran blancura y altamente transpirable, ayudando a reducir problemas de humedad. \r\n\r\nAbsorbe CO₂ durante su proceso de curación y gracias a su alto pH inhibe las bacterias y los virus evitando que se adhieran a las paredes, reduciendo además los problemas de alergias por ácaros, moho, etc.', 104.49, 40, 1, 2.50, 'https://media.adeo.com/media/2139771/media.jpg?width=650&height=650&format=jpg&quality=80&fit=bounds', '2026-03-04 17:56:50'),
+(4, 2, 'Radio de emergencia solar RescueWave', 'Prepárate para cualquier situación con RescueWave, la radio de emergencia versátil y sostenible diseñada para mantenerte conectado, iluminado y con energía en momentos clave. Fabricada con plástico ABS reciclado certificado RCS (Recycled Claim Standard), este dispositivo combina innovación, seguridad y compromiso ambiental.', 26.74, 20, 0, NULL, 'https://firstgreen.es/cdn/shop/files/RadiodeEmergenciaconLinternayPowerBankdeCargaSolaryManivelaSostenibledeABSRecicladoconCertificadoRCSPersonalizableRescueWave_1.jpg?v=1758013678', '2026-03-04 17:56:50'),
+(5, 3, 'Graphenstone Ecosphere Premium Blanco 15L', 'Pintura de interior de base cal, Graphenstone Ecosphere, en color blanco con acabado mate. \r\n\r\nPintura mineral natural muy lavable, gran blancura y altamente transpirable, ayudando a reducir problemas de humedad. \r\n\r\nAbsorbe CO₂ durante su proceso de curación y gracias a su alto pH inhibe las bacterias y los virus evitando que se adhieran a las paredes, reduciendo además los problemas de alergias por ácaros, moho, etc.', 104.49, 35, 1, 2.50, 'https://media.adeo.com/media/2139771/media.jpg?width=650&height=650&format=jpg&quality=80&fit=bounds', '2026-03-04 17:56:50'),
 (6, 3, 'Graphenstone Biosphere Premium 15L', 'Pintura mineral ecológica especialmente indicada para fachadas con acabado mate. Gracias a su fórmula basada en cal 100% artesanal, el producto absorbe CO2 y presenta una excelente transpirabilidad evitando condensaciones.\r\n\r\nCon tecnología Graphenstone para una mayor resistencia y durabilidad. Es ideal para construcción, restauración y repintados. \r\n\r\nDispone de la etiqueta Ecolabel, que certifica que es un producto respetuoso con la salud de las personas y el medioambiente. Contenido: 15 litros.\r\n\r\nPor su fórmula en base cal artesanal con tecnología de grafeno es transpirable, evita las condensaciones, no amarillea y absorbe CO2.', 113.14, 35, 1, 2.50, 'https://media.adeo.com/media/2139979/media.jpeg?width=650&height=650&format=jpg&quality=80&fit=bounds', '2026-03-04 17:56:50'),
 (7, 3, 'Graphenstone AmbientPro+ Premium 15L', 'Pintura fotocatalítica, Graphenstone AmbientPro+, en color blanco con acabado mate para uso interior y exterior. Descompone compuestos orgánicos y gases inorgánicos por la incidencia de la luz, ya sea natural o artificial. \r\n\r\nFavorece la eliminación de olores de animales domésticos, tabaco, etc.\r\n\r\nMuy lavable, absorbe CO₂ durante su proceso de curación y gracias a su alto pH inhibe las bacterias y los virus evitando que se adhieran a las paredes, reduciendo además los problemas de alergias por ácaros, moho, etc. ', 122.82, 30, 1, 2.50, 'https://media.adeo.com/media/2125923/media.jpg?width=650&height=650&format=jpg&quality=80&fit=bounds', '2026-03-04 17:56:50'),
 (8, 3, 'Graphenstone GrafClean Premium 15L', 'Pintura Blanca Ecológica Graphenstone GrafClean Premium es una pintura mate de interior y exterior base agua que no contiene sustancias tóxicas y es transpirable. Libre de COVs y certificada* para el control de la humedad y Con gran resistencia y durabilidad.\r\n\r\nEs ideal para renovar para interiores y exteriores no expuestos. Se recomienda 2 manos sobre una pared ya blanca. Te recomendamos los utensilios necesarios para su aplicación.', 208.09, 20, 1, 2.50, 'https://pinturas-andalucia.com/1170-large_default/pintura-blanca-ecologica-graphenstone-grafclean-premium.jpg', '2026-03-04 17:56:50'),
 (9, 3, 'KEIM Soldalit-Grob 5kg', 'Pintura de sol-silicato con ligero efecto de relleno, para manos de fondo e intermedias en el sistema KEIM Soldalit.\r\n\r\nPara igualar diferencias de textura y para rellenar pequeñas fisuras capilares en la renovación o la nueva aplicación en soportes ligados con resinas o siliconas, así como en soportes minerales.\r\n\r\nKEIM Soldalit-Grob no es adecuada para la mano de acabado. \r\n\r\nKEIM Soldalit-Grob está certificado Cradle to Cradle Certified® Silver y C2C Certified Material Health Certificate™ Gold.', 82.26, 20, 1, 4.00, 'https://www.keim.com/data/_processed_/c/d/csm_PA_EI_Soldalit-Grob_18kg_06_b930eea792.png', '2026-03-04 17:56:50'),
-(11, 3, 'KEIM Soldalit-Fixativ', 'Imprimación y diluyente a base de sol-silicato (combinación de sol de sílice y silicato potásico). \r\n\r\nSe emplea como imprimación en soportes o zonas parciales muy absorbentes, o para diluir KEIM Soldalit® y KEIM Soldalit-Grob en la mano de fondo en soportes muy absorbentes.\r\n\r\nKEIM Soldalit-Fixativ está certificado Cradle to Cradle Certified® Silver y C2C Certified Material Health Certificate™ Gold.', 17.31, 50, 1, 5.00, 'https://www.keim.com/data/_processed_/2/5/csm_PA_KA_Soldalit-Fixativ_20l_06_f43b5c056b.png', '2026-03-04 17:56:50'),
+(11, 3, 'KEIM Soldalit-Fixativ', 'Imprimación y diluyente a base de sol-silicato (combinación de sol de sílice y silicato potásico). \r\n\r\nSe emplea como imprimación en soportes o zonas parciales muy absorbentes, o para diluir KEIM Soldalit® y KEIM Soldalit-Grob en la mano de fondo en soportes muy absorbentes.\r\n\r\nKEIM Soldalit-Fixativ está certificado Cradle to Cradle Certified® Silver y C2C Certified Material Health Certificate™ Gold.', 17.31, 20, 1, 5.00, 'https://www.keim.com/data/_processed_/2/5/csm_PA_KA_Soldalit-Fixativ_20l_06_f43b5c056b.png', '2026-03-04 17:56:50'),
 (12, 3, 'KEIM Soldalit-Coolit 2.5kg', 'Pintura innovadora de sol-silicato para reducir el recalentamiento solar en colores intensos.\r\n\r\nKEIM Soldalit-Coolit es hidrófuga, estable a la luz, y altamente resistente a la intemperie.\r\n\r\nContenido orgánico < 5% KEIM Soldalit-Coolit está certificado Cradle to Cradle Certified® Silver y C2C Certified Material Health Certificate™ Gold.', 58.36, 25, 1, 4.00, 'https://www.keim.com/data/_processed_/7/a/csm_PA_EI_Soldalit-Coolit_18kg_4c_rgb_9dd47af1d2.png', '2026-03-04 17:56:50'),
 (13, 3, 'Oropal Orokril 156 15L', 'Revestimiento mate agua a base de emulsión estireno acrílica para la decoración de interiores y exteriores por su buena impermeabilidad al agua y resistencia a los agentes atmosféricos.\r\n\r\nTranspirable al vapor de agua y CO2. Contiene conservantes que dotan a la pintura de protección fungicida y anti-moho. Con certificado B-s1,d0 de reacción frente al fuego.', 65.95, 40, 1, 2.00, 'https://www.oropal.com/wp-content/uploads/orokril-156.png', '2026-03-04 17:56:50'),
-(14, 3, 'Oropal Esmalte Oroxite 230 750ml', 'Esmalte acrílico directo al óxido de elevado poder antioxidante.\r\nLa excelente adherencia e impermeabilidad de este esmalte al agua permiten su aplicación sobre gran cantidad de superficies protegiéndolas frente a la oxidación sin necesidad de imprimación previa. Formulado a base de resinas no amarilleantes.\r\n\r\nSu película seca es capaz de bloquear el óxido y ofrecer una excelente protección que supera los ensayos exigidos por la norma UNE EN ISO 12944-6:2018 para ambientes altamente corrosivos C5 con una duración de hasta 15 años, según informe de validación realizado por CIDETEC (Centro Tecnológico Homologado).\r\n\r\nPermite la aplicación de 2 manos en un solo día garantizando una resistencia a largo plazo', 21.16, 100, 1, 8.00, 'https://www.oropal.com/wp-content/uploads/oroxite-230.png', '2026-03-04 17:56:50'),
-(15, 4, 'Finsa SuperPan EZ 2440x1220x19mm', 'El SuperPan® EZ es un tablero compuesto por caras de fibra de madera e interior de partículas apto para utilización general en ambiente seco.\n\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.', 33.15, 56, 1, 12.00, 'https://www.finsa.com/documents/d/guest/superpan-_19mm-1-.jpeg', '2026-03-04 17:56:50'),
-(16, 4, 'Finsa SuperPan Top 19mm 2440x1220', 'El SuperPan® Top es un tablero compuesto por caras de fibra de madera de hasta 4 mm de espesor e interior de partículas apto para utilización general en ambiente seco. \r\n\r\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.\r\n\r\nSu capa de fibras de 4mm de espesor permite mecanizados más profundos en caras.', 50.75, 48, 1, 1.00, 'https://www.finsa.com/documents/d/guest/superpan-star-top_35mm-1-.jpeg', '2026-03-04 17:56:50'),
-(17, 4, 'Finsa SuperPan EZ 30mm 2850x2100', 'El SuperPan® EZ es un tablero compuesto por caras de fibra de madera e interior de partículas apto para utilización general en ambiente seco.\n\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.', 148.13, 25, 1, 1.00, 'https://www.finsa.com/documents/d/guest/superpan-_19mm-1-.jpeg', '2026-03-04 17:56:50'),
-(18, 4, 'Finsa SuperPan A13 Haya blanca 2440x1220x10mm', 'Chapa de haya blanca que presenta un color muy claro y uniforme, tendiendo hacia un beige muy pálido, casi crema, con un ligero matiz rosado o amarillento apenas perceptible. El grano de la madera es predominantemente fino y recto, con una textura muy sutil y consistente. Se aprecian algunas variaciones tonales muy suaves que le dan un aspecto natural. La uniformidad general es notable.', 60.79, 40, 1, 14.00, 'https://www.finsa.com/documents/d/guest/haya-blanca-033-2440x1220_crop.jpg', '2026-03-04 17:56:50'),
+(14, 3, 'Oropal Esmalte Oroxite 230 750ml', 'Esmalte acrílico directo al óxido de elevado poder antioxidante.\r\nLa excelente adherencia e impermeabilidad de este esmalte al agua permiten su aplicación sobre gran cantidad de superficies protegiéndolas frente a la oxidación sin necesidad de imprimación previa. Formulado a base de resinas no amarilleantes.\r\n\r\nSu película seca es capaz de bloquear el óxido y ofrecer una excelente protección que supera los ensayos exigidos por la norma UNE EN ISO 12944-6:2018 para ambientes altamente corrosivos C5 con una duración de hasta 15 años, según informe de validación realizado por CIDETEC (Centro Tecnológico Homologado).\r\n\r\nPermite la aplicación de 2 manos en un solo día garantizando una resistencia a largo plazo', 21.16, 25, 1, 8.00, 'https://www.oropal.com/wp-content/uploads/oroxite-230.png', '2026-03-04 17:56:50'),
+(15, 4, 'Finsa SuperPan EZ 2440x1220x19mm', 'El SuperPan® EZ es un tablero compuesto por caras de fibra de madera e interior de partículas apto para utilización general en ambiente seco.\n\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.', 33.15, 30, 1, 12.00, 'https://www.finsa.com/documents/d/guest/superpan-_19mm-1-.jpeg', '2026-03-04 17:56:50'),
+(16, 4, 'Finsa SuperPan Top 19mm 2440x1220', 'El SuperPan® Top es un tablero compuesto por caras de fibra de madera de hasta 4 mm de espesor e interior de partículas apto para utilización general en ambiente seco. \r\n\r\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.\r\n\r\nSu capa de fibras de 4mm de espesor permite mecanizados más profundos en caras.', 50.75, 35, 1, 1.00, 'https://www.finsa.com/documents/d/guest/superpan-star-top_35mm-1-.jpeg', '2026-03-04 17:56:50'),
+(17, 4, 'Finsa SuperPan EZ 30mm 2850x2100', 'El SuperPan® EZ es un tablero compuesto por caras de fibra de madera e interior de partículas apto para utilización general en ambiente seco.\n\nPresenta una superficie lisa y compacta de fibras, adecuada para una gran amplitud de revestimientos decorativos, con todas las ventajas de los tableros SuperPan®.', 148.13, 20, 1, 1.00, 'https://www.finsa.com/documents/d/guest/superpan-_19mm-1-.jpeg', '2026-03-04 17:56:50'),
+(18, 4, 'Finsa SuperPan A13 Haya blanca 2440x1220x10mm', 'Chapa de haya blanca que presenta un color muy claro y uniforme, tendiendo hacia un beige muy pálido, casi crema, con un ligero matiz rosado o amarillento apenas perceptible. El grano de la madera es predominantemente fino y recto, con una textura muy sutil y consistente. Se aprecian algunas variaciones tonales muy suaves que le dan un aspecto natural. La uniformidad general es notable.', 60.79, 35, 1, 14.00, 'https://www.finsa.com/documents/d/guest/haya-blanca-033-2440x1220_crop.jpg', '2026-03-04 17:56:50'),
 (19, 4, 'Finsa SuperPan Haya Blanca 2440x1220x16mm', 'Chapa de haya blanca que presenta un color muy claro y uniforme, tendiendo hacia un beige muy pálido, casi crema, con un ligero matiz rosado o amarillento apenas perceptible. El grano de la madera es predominantemente fino y recto, con una textura muy sutil y consistente. Se aprecian algunas variaciones tonales muy suaves que le dan un aspecto natural. La uniformidad general es notable.', 66.77, 35, 1, 13.00, 'https://www.finsa.com/documents/d/guest/haya-blanca-033-2440x1220_crop.jpg', '2026-03-04 17:56:50'),
-(20, 4, 'Finsa SuperPan Haya blanca 2440x1220x30mm', 'Chapa de haya blanca que presenta un color muy claro y uniforme, tendiendo hacia un beige muy pálido, casi crema, con un ligero matiz rosado o amarillento apenas perceptible. El grano de la madera es predominantemente fino y recto, con una textura muy sutil y consistente. Se aprecian algunas variaciones tonales muy suaves que le dan un aspecto natural. La uniformidad general es notable.', 100.52, 28, 1, 8.00, 'https://www.finsa.com/documents/d/guest/haya-blanca-033-2440x1220_crop.jpg', '2026-03-04 17:56:50'),
+(20, 4, 'Finsa SuperPan Haya blanca 2440x1220x30mm', 'Chapa de haya blanca que presenta un color muy claro y uniforme, tendiendo hacia un beige muy pálido, casi crema, con un ligero matiz rosado o amarillento apenas perceptible. El grano de la madera es predominantemente fino y recto, con una textura muy sutil y consistente. Se aprecian algunas variaciones tonales muy suaves que le dan un aspecto natural. La uniformidad general es notable.', 100.52, 25, 1, 8.00, 'https://www.finsa.com/documents/d/guest/haya-blanca-033-2440x1220_crop.jpg', '2026-03-04 17:56:50'),
 (21, 3, 'KEIM Soldalit-Grob', 'Pintura de sol-silicato con ligero efecto de relleno, para manos de fondo e intermedias en el sistema KEIM Soldalit.\r\n\r\nPara igualar diferencias de textura y para rellenar pequeñas fisuras capilares en la renovación o la nueva aplicación en soportes ligados con resinas o siliconas, así como en soportes minerales.\r\n\r\nKEIM Soldalit-Grob no es adecuada para la mano de acabado.\r\n\r\nKEIM Soldalit-Grob está certificado Cradle to Cradle Certified® Silver y C2C Certified Material Health Certificate™ Gold.', 18.15, 20, 1, 4.00, 'https://www.keim.com/data/_processed_/c/d/csm_PA_EI_Soldalit-Grob_18kg_06_b930eea792.png', '2026-03-04 19:26:37');
 
 -- --------------------------------------------------------
@@ -255,6 +267,7 @@ CREATE TABLE `usuarios` (
   `contrasena` varchar(255) NOT NULL,
   `token_verificacion` varchar(255) DEFAULT NULL,
   `esta_verificado` tinyint(1) DEFAULT 0,
+  `direccion_predeterminada` varchar(255) DEFAULT NULL,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -262,8 +275,10 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `rol_id`, `nombre`, `email`, `contrasena`, `token_verificacion`, `esta_verificado`, `creado_en`) VALUES
-(2, 1, 'Administrador', 'manuel.mariscalmunoz@riberadeltajo.es', '$2y$10$MPKqdCNMbXDECFDK090b2uA8LeObxkFR7tkLl3j1V.YLGOe2tqCza', NULL, 1, '2026-03-04 18:04:10');
+INSERT INTO `usuarios` (`id`, `rol_id`, `nombre`, `email`, `contrasena`, `token_verificacion`, `esta_verificado`, `direccion_predeterminada`, `creado_en`) VALUES
+(2, 1, 'Administrador', 'manuel.mariscalmunoz@riberadeltajo.es', '$2y$10$MPKqdCNMbXDECFDK090b2uA8LeObxkFR7tkLl3j1V.YLGOe2tqCza', NULL, 1, NULL, '2026-03-04 18:04:10'),
+(3, 2, 'Guillermo Etayo', 'mateoruinas@gmail.com', '$2y$10$3Aiqj7nxvaTcOYcMVof1BugaluOIPeLUj/gEHiPcKiLJCjzVKqqS.', NULL, 1, NULL, '2026-03-04 21:26:38'),
+(4, 1, 'Admin', 'admin@talavera.es', '$2y$10$V2sgFQAcqAMn7mnSgm/x8.CjSp0nHB5oRCB2bDXkoLrYqPLPGzE9O', NULL, 1, NULL, '2026-03-05 15:16:07');
 
 --
 -- Índices para tablas volcadas
@@ -346,13 +361,13 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `movimientos_inventario`
 --
 ALTER TABLE `movimientos_inventario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
@@ -376,7 +391,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Restricciones para tablas volcadas

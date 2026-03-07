@@ -21,11 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $id = $_POST['usuario_id'];
 
         if (empty($id)) {
-            // Nuevo usuario (contraseña dummy 'password' para admin tests)
-            $password = password_hash('password', PASSWORD_DEFAULT);
+            // Nuevo usuario (contraseña dummy fuerte para cumplir requisitos)
+            $password = password_hash('Temp@1234', PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO usuarios (rol_id, nombre, email, contrasena, esta_verificado) VALUES (?, ?, ?, ?, 1)");
             if ($stmt->execute([$rol_id, $nombre, $email, $password])) {
-                $mensaje = "<div class='alert alert-success'>Usuario creado correctamente. La contraseña temporal es 'password'.</div>";
+                $mensaje = "<div class='alert alert-success'>Usuario creado correctamente. La contraseña temporal es 'Temp@1234'.</div>";
             }
         } else {
             // Editar usuario existente

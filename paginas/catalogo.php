@@ -5,17 +5,51 @@ require_once '../config/db.php';
 $stmtCategorias = $pdo->query("SELECT * FROM categorias ORDER BY nombre ASC");
 $categorias = $stmtCategorias->fetchAll();
 
-// Obtener productos (con filtro opcional)
-$whereClause = "";
+// Variables para filtros
+$whereClause = [];
 $params = [];
 $categoriaSeleccionada = isset($_GET['categoria']) ? (int) $_GET['categoria'] : 0;
+$busqueda = isset($_GET['search']) ? trim($_GET['search']) : '';
+$minPrecio = isset($_GET['min_precio']) && $_GET['min_precio'] !== '' ? (float) $_GET['min_precio'] : '';
+$maxPrecio = isset($_GET['max_precio']) && $_GET['max_precio'] !== '' ? (float) $_GET['max_precio'] : '';
+$orden = isset($_GET['orden']) ? $_GET['orden'] : 'nombre_asc';
 
 if ($categoriaSeleccionada > 0) {
-    $whereClause = "WHERE p.categoria_id = ?";
+    $whereClause[] = "p.categoria_id = ?";
     $params[] = $categoriaSeleccionada;
 }
 
-$stmtProductos = $pdo->prepare("SELECT p.*, c.nombre as categoria_nombre FROM productos p JOIN categorias c ON p.categoria_id = c.id $whereClause ORDER BY p.nombre ASC");
+if ($busqueda !== '') {
+    $whereClause[] = "(p.nombre LIKE ? OR p.descripcion LIKE ?)";
+    $params[] = '%' . $busqueda . '%';
+    $params[] = '%' . $busqueda . '%';
+}
+
+if ($minPrecio !== '') {
+    $whereClause[] = "p.precio >= ?";
+    $params[] = $minPrecio;
+}
+
+if ($maxPrecio !== '') {
+    $whereClause[] = "p.precio <= ?";
+    $params[] = $maxPrecio;
+}
+
+$whereString = "";
+if (!empty($whereClause)) {
+    $whereString = "WHERE " . implode(" AND ", $whereClause);
+}
+
+// Determinar el orden
+$orderBy = "ORDER BY p.nombre ASC";
+if ($orden === 'nombre_desc')
+    $orderBy = "ORDER BY p.nombre DESC";
+elseif ($orden === 'precio_asc')
+    $orderBy = "ORDER BY p.precio ASC";
+elseif ($orden === 'precio_desc')
+    $orderBy = "ORDER BY p.precio DESC";
+
+$stmtProductos = $pdo->prepare("SELECT p.*, c.nombre as categoria_nombre FROM productos p JOIN categorias c ON p.categoria_id = c.id $whereString $orderBy");
 $stmtProductos->execute($params);
 $productos = $stmtProductos->fetchAll();
 
@@ -39,23 +73,78 @@ include '../includes/header.php';
                 style="background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); position: sticky; top: 100px;">
                 <h3
                     style="font-size: 1.2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                    Categorías</h3>
-                <ul style="list-style: none;">
-                    <li style="margin-bottom: 0.5rem;">
-                        <a href="catalogo.php"
-                            style="color: <?php echo $categoriaSeleccionada == 0 ? 'var(--primary-color)' : 'var(--text-dark)'; ?>; font-weight: <?php echo $categoriaSeleccionada == 0 ? 'bold' : 'normal'; ?>;"><i
-                                class="fa-solid fa-angle-right"></i> Todos los productos</a>
-                    </li>
-                    <?php foreach ($categorias as $cat): ?>
-                        <li style="margin-bottom: 0.5rem;">
-                            <a href="catalogo.php?categoria=<?php echo $cat['id']; ?>"
-                                style="color: <?php echo $categoriaSeleccionada == $cat['id'] ? 'var(--primary-color)' : 'var(--text-dark)'; ?>; font-weight: <?php echo $categoriaSeleccionada == $cat['id'] ? 'bold' : 'normal'; ?>;">
-                                <i class="fa-solid fa-angle-right"></i>
-                                <?php echo htmlspecialchars($cat['nombre']); ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                    <i class="fa-solid fa-filter"></i> Filtros
+                </h3>
+
+                <form action="catalogo.php" method="GET">
+
+                    <!-- Búsqueda -->
+                    <div style="margin-bottom: 1rem;">
+                        <label for="search"
+                            style="display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">Buscar</label>
+                        <input type="text" name="search" id="search" value="<?php echo htmlspecialchars($busqueda); ?>"
+                            placeholder="Ej. Taladro, Pintura..."
+                            style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                    </div>
+
+                    <!-- Categorías -->
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">Categoría</label>
+                        <select name="categoria"
+                            style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                            <option value="0">Todas las categorías</option>
+                            <?php foreach ($categorias as $cat): ?>
+                                <option value="<?php echo $cat['id']; ?>" <?php echo $categoriaSeleccionada == $cat['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($cat['nombre']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Precio -->
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">Precio
+                            (€)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="number" name="min_precio" value="<?php echo htmlspecialchars($minPrecio); ?>"
+                                placeholder="Min" step="0.01" min="0"
+                                style="width: 50%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                            <input type="number" name="max_precio" value="<?php echo htmlspecialchars($maxPrecio); ?>"
+                                placeholder="Max" step="0.01" min="0"
+                                style="width: 50%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                        </div>
+                    </div>
+
+                    <!-- Ordenar por -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label
+                            style="display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">Ordenar
+                            por</label>
+                        <select name="orden"
+                            style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                            <option value="nombre_asc" <?php echo $orden == 'nombre_asc' ? 'selected' : ''; ?>>Nombre
+                                (A-Z)</option>
+                            <option value="nombre_desc" <?php echo $orden == 'nombre_desc' ? 'selected' : ''; ?>>Nombre
+                                (Z-A)</option>
+                            <option value="precio_asc" <?php echo $orden == 'precio_asc' ? 'selected' : ''; ?>>Precio
+                                (Menor a Mayor)</option>
+                            <option value="precio_desc" <?php echo $orden == 'precio_desc' ? 'selected' : ''; ?>>Precio
+                                (Mayor a Menor)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.5rem;">
+                        <i class="fa-solid fa-search"></i> Aplicar Filtros
+                    </button>
+                    <?php if ($categoriaSeleccionada > 0 || $busqueda !== '' || $minPrecio !== '' || $maxPrecio !== '' || $orden !== 'nombre_asc'): ?>
+                        <a href="catalogo.php" class="btn btn-outline"
+                            style="width: 100%; text-align: center; display: block; margin-top: 0.5rem; padding: 0.5rem; color: var(--text-muted);">
+                            Limpiar
+                        </a>
+                    <?php endif; ?>
+                </form>
             </div>
         </aside>
 

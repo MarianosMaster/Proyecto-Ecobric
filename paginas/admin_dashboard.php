@@ -17,8 +17,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION[
 $stmt = $pdo->query("SELECT COUNT(*) FROM usuarios WHERE rol_id = 2");
 $total_clientes = $stmt->fetchColumn();
 
-// Stock Bajo (menos de 20 unidades)
-$stmt = $pdo->query("SELECT COUNT(*) FROM productos WHERE stock < 20");
+// Stock Bajo (menos de 5 unidades)
+$stmt = $pdo->query("SELECT COUNT(*) FROM productos WHERE stock < 5");
 $stock_bajo = $stmt->fetchColumn();
 
 // Gastos e Ingresos del mes actual
@@ -104,7 +104,7 @@ $page_title = "Panel de Administración";
                     <div class="stat-card warning" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)';" onmouseout="this.style.transform='translateY(0)';">
                         <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="stat-info">
-                            <h3>Stock Crítico (< 20)</h3>
+                            <h3>Stock Crítico (< 5)</h3>
                             <p><?php echo $stock_bajo; ?></p>
                         </div>
                     </div>
@@ -144,6 +144,7 @@ $page_title = "Panel de Administración";
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Total</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,6 +161,11 @@ $page_title = "Panel de Administración";
                             <td><?php echo date('d/m/Y H:i', strtotime($row['creado_en'])); ?></td>
                             <td><span class="status-badge <?php echo $badgeClass; ?>"><?php echo $row['estado']; ?></span></td>
                             <td><?php echo number_format($row['monto_total'], 2); ?> €</td>
+                            <td>
+                                <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="verDetallesAdmin(<?php echo $row['id']; ?>)">
+                                    <i class="fa-solid fa-eye"></i> Ver
+                                </button>
+                            </td>
                         </tr>
                         <?php endwhile; ?>
                         <?php if($stmt->rowCount() == 0): ?>
@@ -170,8 +176,66 @@ $page_title = "Panel de Administración";
             </div>
 
         </main>
+    <?php include '../includes/admin_excel_modal.php'; ?>
+
+    <!-- Modal Detalles Pedido Admin -->
+    <div id="modalDetallesAdmin" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: var(--border-radius); width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h2 style="margin: 0;">Detalles Admin Pedido <span id="modalAdminPedidoId"></span></h2>
+                <button onclick="cerrarModalDetallesAdmin()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div id="modalAdminContenido">
+                <p style="text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando detalles...</p>
+            </div>
+        </div>
     </div>
 
-    <?php include '../includes/admin_excel_modal.php'; ?>
+    <script>
+        function verDetallesAdmin(pedidoId) {
+            document.getElementById('modalDetallesAdmin').style.display = 'flex';
+            document.getElementById('modalAdminPedidoId').innerText = "#" + String(pedidoId).padStart(5, '0');
+            document.getElementById('modalAdminContenido').innerHTML = '<p style="text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando detalles...</p>';
+            
+            fetch('../api/get_order_details.php?id=' + pedidoId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let html = '<div style="background-color: #f0f4f8; padding: 10px; border-radius: 4px; margin-bottom: 15px;">' +
+                                   '<h4 style="margin: 0 0 5px 0; color: #2e7d32; font-size: 0.9rem;">Destino de Envío:</h4>' +
+                                   '<p style="margin: 0; font-size: 0.95rem;">' + data.direccion_envio + '</p></div>' +
+                                   '<table style="width: 100%; border-collapse: collapse;">' +
+                                   '<thead style="background: var(--bg-light); border-bottom: 1px solid var(--border-color);">' +
+                                   '<tr><th style="padding: 0.5rem; text-align: left;">Producto</th>' +
+                                   '<th style="padding: 0.5rem; text-align: center;">Cant.</th>' +
+                                   '<th style="padding: 0.5rem; text-align: right;">Precio</th>' +
+                                   '<th style="padding: 0.5rem; text-align: right;">Subtotal</th></tr></thead><tbody>';
+                        let total = 0;
+                        data.detalles.forEach(item => {
+                            let subtotal = item.cantidad * item.precio_unitario;
+                            total += subtotal;
+                            html += '<tr style="border-bottom: 1px solid #eee;">' +
+                                    '<td style="padding: 0.5rem;">' + item.nombre + '</td>' +
+                                    '<td style="padding: 0.5rem; text-align: center;">' + item.cantidad + '</td>' +
+                                    '<td style="padding: 0.5rem; text-align: right;">' + parseFloat(item.precio_unitario).toFixed(2) + ' €</td>' +
+                                    '<td style="padding: 0.5rem; text-align: right; font-weight: bold;">' + subtotal.toFixed(2) + ' €</td>' +
+                                    '</tr>';
+                        });
+                        html += '</tbody></table>';
+                        
+                        document.getElementById('modalAdminContenido').innerHTML = html;
+                    } else {
+                        document.getElementById('modalAdminContenido').innerHTML = '<p style="color: var(--danger); text-align: center;">' + data.message + '</p>';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('modalAdminContenido').innerHTML = '<p style="color: var(--danger); text-align: center;">Error de conexión.</p>';
+                });
+        }
+
+        function cerrarModalDetallesAdmin() {
+            document.getElementById('modalDetallesAdmin').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

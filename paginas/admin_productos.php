@@ -85,7 +85,7 @@ $query = "SELECT p.id, p.nombre, p.stock, p.precio, p.es_calculable_volumen, p.c
           GROUP BY p.id";
 
 if ($filtro_stock === 'bajo') {
-    $query .= " HAVING p.stock < 20";
+    $query .= " HAVING p.stock < 5";
 }
 
 $query .= " ORDER BY p.stock ASC";
@@ -218,8 +218,8 @@ $page_title = "Gestión de Productos";
                         <select id="filterStock" onchange="filterTable()" class="search-bar"
                             style="width: auto; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
                             <option value="">Cualquier Stock</option>
-                            <option value="bajo">Bajo Stock (< 20)</option>
-                            <option value="ok">En Stock (>= 20)</option>
+                            <option value="bajo">Bajo Stock (< 5)</option>
+                            <option value="ok">En Stock (>= 5)</option>
                             <option value="agotado">Agotado (0)</option>
                         </select>
                         <div class="search-bar" style="margin: 0; min-width: 250px;">
@@ -265,7 +265,7 @@ $page_title = "Gestión de Productos";
                                     <?php if ($p['stock'] == 0): ?>
                                         <span style="color:var(--danger); font-weight:bold;"><i class="fa-solid fa-xmark"></i>
                                             0</span>
-                                    <?php elseif ($p['stock'] < 20): ?>
+                                    <?php elseif ($p['stock'] < 5): ?>
                                         <span style="color:var(--warning); font-weight:bold;"><i
                                                 class="fa-solid fa-warning"></i> <?php echo $p['stock']; ?></span>
                                     <?php else: ?>
@@ -385,8 +385,8 @@ $page_title = "Gestión de Productos";
                     let matchSupp = filterSupp === "" || txtProv.toLowerCase().includes(filterSupp);
 
                     let matchStock = true;
-                    if (filterStock === "bajo") matchStock = numStock < 20 && numStock > 0;
-                    else if (filterStock === "ok") matchStock = numStock >= 20;
+                    if (filterStock === "bajo") matchStock = numStock < 5 && numStock > 0;
+                    else if (filterStock === "ok") matchStock = numStock >= 5;
                     else if (filterStock === "agotado") matchStock = numStock === 0;
 
                     if (matchSearch && matchCat && matchSupp && matchStock) {

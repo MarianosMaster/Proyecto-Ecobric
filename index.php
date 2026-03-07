@@ -13,7 +13,7 @@ include 'includes/header.php';
     style="background-image: linear-gradient(rgba(46,125,50,0.8), rgba(0,80,5,0.8)), url('https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop');">
     <div class="container">
         <h1>Construcción Sostenible a tu Alcance</h1>
-        <p>Materiales ecológicos, bloques de tierra y aislantes naturales para un futuro más verde. Reduce el impacto
+        <p>Herramientas ecológicas, madera certificada y pinturas naturales para un futuro más verde. Reduce el impacto
             ambiental de tus obras con Ecobric.</p>
         <div class="hero-actions">
             <a href="paginas/catalogo.php" class="btn btn-primary">Ver Catálogo</a>
@@ -43,10 +43,8 @@ include 'includes/header.php';
                 style="text-align: center; padding: 2rem; background-color: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); transition: var(--transition);">
                 <i class="fa-solid fa-layer-group"
                     style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
-                <h3>Simulador de Muro</h3>
-                <p style="margin-bottom: 1rem;">Visuliza de forma interactiva las capas de tu pared y obtén el
-                    Certificado de Huella Verde.</p>
-                <a href="paginas/simulador.php" class="btn btn-outline">Probar Ahora</a>
+                <h3>Envíos a toda la región</h3>
+                <p style="margin-bottom: 1rem;">Envíos rápidos y seguros a toda la región de Castilla-La Mancha.</p>
             </div>
             <div
                 style="padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-sm);">
@@ -54,13 +52,7 @@ include 'includes/header.php';
                     style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
                 <h3 style="font-size: 1.2rem;">Suministro Exacto</h3>
                 <p>Usa nuestra calculadora para pedir exactamente lo que necesitas, sin desperdicios.</p>
-            </div>
-            <div
-                style="padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-sm);">
-                <i class="fa-solid fa-truck-fast"
-                    style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h3 style="font-size: 1.2rem;">Envío a Obra</h3>
-                <p>Llevamos el material a tu proyecto, asegurando trazabilidad y puntualidad.</p>
+                <a href="paginas/calculadora.php" class="btn btn-outline">Probar Ahora</a>
             </div>
         </div>
     </div>
